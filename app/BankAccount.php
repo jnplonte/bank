@@ -17,15 +17,26 @@ class BankAccount extends Model
 
     }
 
+    public function getAccount($id = null, $by = null){
+      if(!empty($id) && !empty($by)){
+        $accounts = DB::table($this->table)
+                ->select('id as account_id', 'balance')
+                ->where($by, $id)
+                ->get();
+        return array('success' => true, 'data' => $accounts);
+      }
+      return array('success' => false, 'data' => null);
+    }
+
     public function insertAccount($id = null, $balance = null){
       if(!empty($id)){
         $arr['updated_at'] =  date('Y-m-d G:i:s');
         $arr['created_at'] =  date('Y-m-d G:i:s');
         $arr['user_id'] = $id;
         $arr['balance'] = !empty($balance) ? $balance : 0;
-        $account = DB::table($this->table)
+        $accounts = DB::table($this->table)
                   ->insert($arr);
-        if(!empty($account)){
+        if(!empty($accounts)){
           return array('success' => true, 'data' => array('user_id' => $id));
         }
       }
@@ -34,10 +45,10 @@ class BankAccount extends Model
 
     public function deleteAccount($id = null){
       if(!empty($id)){
-        $account = DB::table($this->table)
+        $accounts = DB::table($this->table)
                 ->where('user_id', $id)
                 ->delete();
-        if(!empty($account)){
+        if(!empty($accounts)){
           return array('success' => true, 'data' => array('user_id' => $id));
         }
       }

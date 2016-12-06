@@ -11,12 +11,11 @@
 |
 */
 
+Route::get('/', function () {
+    return 'Think Labs';
+});
+
 Route::group(['middleware' => ['bankApi']], function () {
-
-    Route::get('/', function () {
-        return abort(404);
-    });
-
     //getting all users information
     Route::get('users', [
         'as' => 'user', 'uses' => 'UserController@getAll'

@@ -17,30 +17,43 @@ class UserController extends Controller
 
     public function getAll()
     {
-      $userData = new BankUser();
       $getData = $this->request->all();
 
       $sort = !empty($getData['sort']) ? $getData['sort'] : null;
       $page = !empty($getData['page']) ? $getData['page'] : null;
       $search = !empty($getData['q']) ? $getData['q'] : null;
 
-      return response()->json($userData->getUsers($sort, $page, $search));
+      $bankUser = new BankUser();
+      $userData = $bankUser->getUsers($sort, $page, $search)->toArray();
+      if($userData['total'] >= 1){
+        $bankAccount = new BankAccount();
+        foreach ($userData['data'] as $key => $value) {
+          $value->accounts = $bankAccount->getAccount($value->user_id, 'user_id')['data'];
+        }
+      }
+      return response()->json($userData);
     }
 
     public function get($id=null)
     {
-      $userData = new BankUser();
-      return response()->json($userData->getUser($id));
+      $bankUser = new BankUser();
+      $userData = $bankUser->getUser($id);
+      if(!empty($userData['data'])){
+        $bankAccount = new BankAccount();
+          $userData['data']->accounts = $bankAccount->getAccount($userData['data']->user_id, 'user_id')['data'];
+      }
+      return response()->json($userData);
     }
 
     public function insert()
     {
         $postData = $this->request->all();
-        $userData = new BankUser();
-        $insertUser = $userData->insertUser($postData);
+        $bankUser = new BankUser();
+        $insertUser = $bankUser->insertUser($postData);
         if($insertUser['success'] == true){
-          $accountData = new BankAccount();
-          return response()->json($accountData->insertAccount($insertUser['data']['user_id'], $postData['balance']));
+          $bankAccount = new BankAccount();
+          $balance = !empty($postData['balance']) ? $postData['balance'] : null;
+          return response()->json($bankAccount->insertAccount($insertUser['data']['user_id'], $balance));
         }else{
           return response()->json($insertUser);
         }
@@ -50,16 +63,16 @@ class UserController extends Controller
     {
       if ($this->request->isMethod('put')) {
           $putData = $this->request->all();
-          $userData = new BankUser();
-          return response()->json($userData->updateUser($id, $putData));
+          $bankUser = new BankUser();
+          return response()->json($bankUser->updateUser($id, $putData));
       }
 
       if ($this->request->isMethod('delete')) {
-          $userData = new BankUser();
-          $deleteUser = $userData->deleteUser($id);
+          $bankUser = new BankUser();
+          $deleteUser = $bankUser->deleteUser($id);
           if($deleteUser['success'] == true){
-            $accountData = new BankAccount();
-            return response()->json($accountData->deleteAccount($deleteUser['data']['user_id']));
+            $bankAccount = new BankAccount();
+            return response()->json($bankAccount->deleteAccount($deleteUser['data']['user_id']));
           }else{
             return response()->json($deleteUser);
           }
