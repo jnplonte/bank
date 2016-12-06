@@ -17,18 +17,22 @@ Route::group(['middleware' => ['bankApi']], function () {
         return abort(404);
     });
 
+    //getting all users information
     Route::get('users', [
         'as' => 'user', 'uses' => 'UserController@getAll'
     ]);
 
+    //inserting user information
     Route::post('user', [
         'as' => 'user', 'uses' => 'UserController@insert'
     ]);
 
+    //getting specific user information
     Route::get('user/{id}', [
         'as' => 'user', 'uses' => 'UserController@get'
     ])->where('id', '[0-9]+');
 
+    //updating and deleting user information
     Route::match(['put', 'delete'], 'user/{id}', [
         'as' => 'user', 'uses' => 'UserController@update'
     ])->where('id', '[0-9]+');

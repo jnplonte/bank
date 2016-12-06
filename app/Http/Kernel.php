@@ -35,6 +35,7 @@ class Kernel extends HttpKernel
             'throttle:60,1',
         ],
 
+        // custom API middleware handle authentications
         'bankApi' => [
           \App\Http\Middleware\EncryptCookies::class,
           \App\Http\Middleware\ApiHeaders::class

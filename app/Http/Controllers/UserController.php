@@ -5,7 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\BankUser;
-use App\InfoUser;
+use App\BankAccount;
 
 class UserController extends Controller
 {
@@ -39,10 +39,10 @@ class UserController extends Controller
         $userData = new BankUser();
         $insertUser = $userData->insertUser($postData);
         if($insertUser['success'] == true){
-          $infoData = new InfoUser();
-          return response()->json($infoData->insertInfo($insertUser['id']));
+          $accountData = new BankAccount();
+          return response()->json($accountData->insertAccount($insertUser['data']['user_id'], $postData['balance']));
         }else{
-          return abort(404);
+          return response()->json($insertUser);
         }
     }
 
@@ -56,7 +56,14 @@ class UserController extends Controller
 
       if ($this->request->isMethod('delete')) {
           $userData = new BankUser();
-          return response()->json($userData->deleteUser($id));
+          $deleteUser = $userData->deleteUser($id);
+          if($deleteUser['success'] == true){
+            $accountData = new BankAccount();
+            return response()->json($accountData->deleteAccount($deleteUser['data']['user_id']));
+          }else{
+            return response()->json($deleteUser);
+          }
+
       }
 
       return abort(404);

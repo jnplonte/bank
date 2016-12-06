@@ -7,16 +7,22 @@ use DB;
 
 class BankUser extends Model
 {
+    //datbase table
     protected $table = 'user';
 
-    protected $fillable = ['name', 'balance'];
+    //fillable information
+    protected $fillable = ['first_name', 'last_name', 'email'];
 
+    //items per page
     protected $page = 10;
 
+    //default sorting
     protected $type = 'id';
 
+    //default sorting direction
     protected $sort = 'asc';
 
+    //searh parameters
     protected $search = '';
 
     public function __construct(){
@@ -29,70 +35,85 @@ class BankUser extends Model
       if(!empty($sort)){ $this->sort = $sort; $appends['sort'] = $sort; }
       if(!empty($search)){ $this->search = $search;  $appends['q'] = $search; }
       $users = DB::table($this->table)
-          ->select('id', 'name', 'balance')
-          ->where('name', 'like', '%'.$search.'%')
-          ->orderBy($this->type, $this->sort)
-          ->paginate($this->page)
-          ->appends($appends);
+              ->select('id as user_id', 'first_name', 'last_name', 'email')
+              ->where('first_name', 'like', '%'.$search.'%')
+              ->orWhere('last_name', 'like', '%'.$search.'%')
+              ->orWhere('email', 'like', '%'.$search.'%')
+              ->orderBy($this->type, $this->sort)
+              ->paginate($this->page)
+              ->appends($appends);
       return $users;
     }
 
     public function getUser($id = null){
       if(!empty($id)){
         $users = DB::table($this->table)
-            ->select('name', 'balance')
-            ->where('id', $id)
-            ->first();
+                ->select('id as user_id', 'first_name', 'last_name', 'email')
+                ->where('id', $id)
+                ->first();
         return array('success' => true, 'data' => $users);
-      }else{
-        return array('success' => false, 'data' => null);
       }
+      return array('success' => false, 'data' => null);
     }
 
     public function updateUser($id = null, $arr = array()){
       if(!empty($id) && !empty($arr)){
-        $arr['updated_at'] =  date('Y-m-d G:i:s');
-        $users = DB::table($this->table)
-            ->where('id', $id)
-            ->update($arr);
-        if(!empty($users)){
-          return array('success' => true, 'id' => $id);
-        }else{
-          return array('success' => false, 'id' => null);
+        $checkDuplicateEmail = true;
+        if(!empty($arr['email'])){
+          $checkDuplicateEmail = DB::table($this->table)->where('email', $arr['email'])->where('id', '!=', $id)->get();
         }
-      }else{
-        return array('success' => false, 'id' => null);
+        if( empty($checkDuplicateEmail) ){
+          $arr = $this->getFillableInfo($arr);
+          $arr['updated_at'] =  date('Y-m-d G:i:s');
+          $users = DB::table($this->table)
+                  ->where('id', $id)
+                  ->update($arr);
+          if(!empty($users)){
+            return array('success' => true, 'data' => array('user_id' => $id));
+          }
+        }
       }
+      return array('success' => false, 'data' => null);
     }
 
     public function deleteUser($id = null){
       if(!empty($id)){
         $users = DB::table($this->table)
-        ->where('id', $id)
-        ->delete();
+                ->where('id', $id)
+                ->delete();
         if(!empty($users)){
-          return array('success' => true, 'id' => $id);
-        }else{
-          return array('success' => false, 'id' => null);
+          return array('success' => true, 'data' => array('user_id' => $id));
         }
-      }else{
-        return array('success' => false, 'id' => null);
       }
+      return array('success' => false, 'data' => null);
     }
 
     public function insertUser($arr = array()){
-      if(!empty($arr)){
-        $arr['updated_at'] =  date('Y-m-d G:i:s');
-        $arr['created_at'] =  date('Y-m-d G:i:s');
-        $id = DB::table($this->table)
-        ->insertGetId($arr);
-        if(!empty($id)){
-          return array('success' => true, 'id' => $id);
-        }else{
-          return array('success' => false, 'id' => null);
+      if(!empty($arr['email'])){
+        $checkDuplicateEmail = DB::table($this->table)->where('email', $arr['email'])->get();
+        if( empty($checkDuplicateEmail) ){
+          $arr = $this->getFillableInfo($arr);
+          $arr['updated_at'] =  date('Y-m-d G:i:s');
+          $arr['created_at'] =  date('Y-m-d G:i:s');
+          $id = DB::table($this->table)
+                ->insertGetId($arr);
+          if(!empty($id)){
+            return array('success' => true, 'data' => array('user_id' => $id));
+          }
         }
-      }else{
-        return array('success' => false, 'id' => null);
       }
+      return array('success' => false, 'data' => null);
+    }
+
+    private function getFillableInfo($arr = null){
+      if(!empty($arr)){
+        $finalArr = array();
+        foreach ($this->fillable as $value) {
+          if( !empty($arr[$value]) ){
+            $finalArr[$value] = $arr[$value];
+          }
+        }
+      }
+      return $finalArr;
     }
 }
