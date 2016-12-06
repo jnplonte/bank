@@ -53,7 +53,7 @@ class BankUser extends Model
                 ->first();
         return array('success' => true, 'data' => $users);
       }
-      return array('success' => false, 'data' => null);
+      return array('success' => false, 'error' => 'no data found');
     }
 
     public function updateUser($id = null, $arr = array()){
@@ -73,7 +73,7 @@ class BankUser extends Model
           }
         }
       }
-      return array('success' => false, 'data' => null);
+      return array('success' => false, 'error' => 'unable to process request');
     }
 
     public function deleteUser($id = null){
@@ -85,7 +85,7 @@ class BankUser extends Model
           return array('success' => true, 'data' => array('user_id' => $id));
         }
       }
-      return array('success' => false, 'data' => null);
+      return array('success' => false, 'error' => 'unable to process request');
     }
 
     public function insertUser($arr = array()){
@@ -102,7 +102,7 @@ class BankUser extends Model
           }
         }
       }
-      return array('success' => false, 'data' => null);
+      return array('success' => false, 'error' => 'unable to process request');
     }
 
     private function getFillableInfo($arr = null){

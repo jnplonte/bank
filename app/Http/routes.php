@@ -35,4 +35,14 @@ Route::group(['middleware' => ['bankApi']], function () {
     Route::match(['put', 'delete'], 'user/{id}', [
         'as' => 'user', 'uses' => 'UserController@update'
     ])->where('id', '[0-9]+');
+
+    //withdraw money
+    Route::match(['put'], 'withdraw/{id}', [
+        'as' => 'user', 'uses' => 'AccountController@withdraw'
+    ])->where('id', '[0-9]+');
+
+    //deposit money
+    Route::match(['put'], 'deposit/{id}', [
+        'as' => 'user', 'uses' => 'AccountController@deposit'
+    ])->where('id', '[0-9]+');
 });

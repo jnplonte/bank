@@ -17,7 +17,7 @@ class Transaction extends Migration
             $table->integer('user_id');
             $table->integer('account_id');
             $table->integer('amount');
-            $table->integer('type')->default(1); //1->deposit, 2->withdraw
+            $table->integer('type')->default(0); //1->deposit, 2->withdraw 3->transfer
             $table->text('log')->nullable();
             $table->timestamp('created_at')->nullable();
         });

@@ -78,7 +78,6 @@ class UserController extends Controller
           }
 
       }
-
       return abort(404);
     }
 }
