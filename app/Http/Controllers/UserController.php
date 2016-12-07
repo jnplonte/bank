@@ -50,7 +50,7 @@ class UserController extends Controller
         $postData = $this->request->all();
         $bankUser = new BankUser();
         $insertUser = $bankUser->insertUser($postData);
-        if($insertUser['success'] == true){
+        if($insertUser['status'] == 'success'){
           $bankAccount = new BankAccount();
           $balance = !empty($postData['balance']) ? $postData['balance'] : null;
           return response()->json($bankAccount->insertAccount($insertUser['data']['user_id'], $balance));
@@ -70,7 +70,7 @@ class UserController extends Controller
       if ($this->request->isMethod('delete')) {
           $bankUser = new BankUser();
           $deleteUser = $bankUser->deleteUser($id);
-          if($deleteUser['success'] == true){
+          if($deleteUser['status'] == 'success'){
             $bankAccount = new BankAccount();
             return response()->json($bankAccount->deleteAccount($deleteUser['data']['user_id']));
           }else{

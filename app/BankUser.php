@@ -51,14 +51,14 @@ class BankUser extends Model
                 ->select('id as user_id', 'first_name', 'last_name', 'email')
                 ->where('id', $id)
                 ->first();
-        return array('success' => true, 'data' => $users);
+        return array('status' => 'success', 'data' => $users);
       }
-      return array('success' => false, 'error' => 'no data found');
+      return array('status' => 'failed', 'error' => 'no data found');
     }
 
     public function updateUser($id = null, $arr = array()){
       if(!empty($id) && !empty($arr)){
-        $checkDuplicateEmail = true;
+        $checkDuplicateEmail = false;
         if(!empty($arr['email'])){
           $checkDuplicateEmail = DB::table($this->table)->where('email', $arr['email'])->where('id', '!=', $id)->get();
         }
@@ -69,11 +69,13 @@ class BankUser extends Model
                   ->where('id', $id)
                   ->update($arr);
           if(!empty($users)){
-            return array('success' => true, 'data' => array('user_id' => $id));
+            return array('status' => 'success', 'data' => array('user_id' => $id));
           }
+        }else{
+          return array('status' => 'failed', 'error' => 'email already exists');
         }
       }
-      return array('success' => false, 'error' => 'unable to process request');
+      return array('status' => 'failed', 'error' => 'unable to process request');
     }
 
     public function deleteUser($id = null){
@@ -82,10 +84,10 @@ class BankUser extends Model
                 ->where('id', $id)
                 ->delete();
         if(!empty($users)){
-          return array('success' => true, 'data' => array('user_id' => $id));
+          return array('status' => 'success', 'data' => array('user_id' => $id));
         }
       }
-      return array('success' => false, 'error' => 'unable to process request');
+      return array('status' => 'failed', 'error' => 'unable to process request');
     }
 
     public function insertUser($arr = array()){
@@ -98,11 +100,13 @@ class BankUser extends Model
           $id = DB::table($this->table)
                 ->insertGetId($arr);
           if(!empty($id)){
-            return array('success' => true, 'data' => array('user_id' => $id));
+            return array('status' => 'success', 'data' => array('user_id' => $id));
           }
+        }else{
+          return array('status' => 'failed', 'error' => 'email already exists');
         }
       }
-      return array('success' => false, 'error' => 'unable to process request');
+      return array('status' => 'failed', 'error' => 'unable to process request');
     }
 
     private function getFillableInfo($arr = null){

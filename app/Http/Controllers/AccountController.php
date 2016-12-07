@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\BankAccount;
+use App\BankTransaction;
 
 class AccountController extends Controller
 {
@@ -19,7 +20,11 @@ class AccountController extends Controller
       $putData = $this->request->all();
       if(!empty($putData['amount'])){
         $bankAccount = new BankAccount();
-        return response()->json($bankAccount->withdrawAccount($id, $putData['amount']));
+        $withdrawAccount = $bankAccount->withdrawAccount($id, $putData['amount']);
+        if($withdrawAccount['status'] == 'success'){
+          $this->insertLog($id, $putData['amount'], 1);
+        }
+        return response()->json($withdrawAccount);
       }
       return abort(404);
     }
@@ -29,8 +34,17 @@ class AccountController extends Controller
       $putData = $this->request->all();
       if(!empty($putData['amount'])){
         $bankAccount = new BankAccount();
-        return response()->json($bankAccount->depositAccount($id, $putData['amount']));
+        $depositAccount = $bankAccount->depositAccount($id, $putData['amount']);
+        if($depositAccount['status'] == 'success'){
+          $this->insertLog($id, $putData['amount'], 2);
+        }
+        return response()->json($depositAccount);
       }
       return abort(404);
+    }
+
+    private function insertLog($id = null, $amount = null, $type = null){
+      $bankTransaction = new BankTransaction();
+      $bankTransaction->insertTransaction($id, $amount, $type);
     }
 }

@@ -15,6 +15,9 @@ deposit
 [PUT] /deposit/{account_id}
 required params: "amount"
 
+transfer
+[PUT] /transfer/{account_id}
+required params: "amount", "transfer_id"
 
 
 add user
@@ -31,8 +34,7 @@ get one user
 
 update user
 [PUT] /user/{user_id}
-required params: "email"
-optional params: "first_name", "last_name", "balance"
+optional params: "email", "first_name", "last_name", "balance"
 
 delete user
 [DELETE] /user/{user_id}

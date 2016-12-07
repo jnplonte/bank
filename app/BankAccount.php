@@ -23,9 +23,9 @@ class BankAccount extends Model
                     ->select('id as account_id', 'balance')
                     ->where($by, $id)
                     ->get();
-        return array('success' => true, 'data' => $accounts);
+        return array('status' => 'success', 'data' => $accounts);
       }
-      return array('success' => false, 'error' => 'no data found');
+      return array('status' => 'failed', 'error' => 'no data found');
     }
 
     public function insertAccount($id = null, $balance = null){
@@ -37,10 +37,10 @@ class BankAccount extends Model
         $accounts = DB::table($this->table)
                     ->insert($arr);
         if(!empty($accounts)){
-          return array('success' => true, 'data' => array('user_id' => $id));
+          return array('status' => 'success', 'data' => array('user_id' => $id));
         }
       }
-      return array('success' => false, 'error' => 'unable to process request');
+      return array('status' => 'failed', 'error' => 'unable to process request');
     }
 
     public function deleteAccount($id = null){
@@ -49,10 +49,10 @@ class BankAccount extends Model
                     ->where('user_id', $id)
                     ->delete();
         if(!empty($accounts)){
-          return array('success' => true, 'data' => array('user_id' => $id));
+          return array('status' => 'success', 'data' => array('user_id' => $id));
         }
       }
-      return array('success' => false, 'error' => 'unable to process request');
+      return array('status' => 'failed', 'error' => 'unable to process request');
     }
 
     public function withdrawAccount($id = null, $amount = null){
@@ -65,33 +65,44 @@ class BankAccount extends Model
                       ->where('id', $id)
                       ->update($arr);
           if(!empty($accounts)){
-            return array('success' => true, 'data' => array('account_id' => $id));
+            return array('status' => 'success', 'data' => array('account_id' => $id));
           }
+        }else{
+          return array('status' => 'failed', 'error' => 'insufficient funds');
         }
       }
-      return array('success' => false, 'error' => 'unable to process request');
+      return array('status' => 'failed', 'error' => 'unable to process request');
     }
 
     public function depositAccount($id = null, $amount = null){
       if(!empty($id) && !empty($amount)){
         $assumeBalance = DB::table($this->table)->select('balance')->where('id', $id)->first();
-        $arr['updated_at'] = date('Y-m-d G:i:s');
-        $arr['balance'] = (int)$assumeBalance->balance + (int)$amount;
-        $accounts = DB::table($this->table)
-                    ->where('id', $id)
-                    ->update($arr);
-        if(!empty($accounts)){
-          return array('success' => true, 'data' => array('account_id' => $id));
+          if(!empty($assumeBalance)){
+          $arr['updated_at'] = date('Y-m-d G:i:s');
+          $arr['balance'] = (int)$assumeBalance->balance + (int)$amount;
+          $accounts = DB::table($this->table)
+                      ->where('id', $id)
+                      ->update($arr);
+          if(!empty($accounts)){
+            return array('status' => 'success', 'data' => array('account_id' => $id));
+          }
         }
       }
-      return array('success' => false, 'error' => 'unable to process request');
+      return array('status' => 'failed', 'error' => 'unable to process request');
+    }
+
+    public function getAccountInfo($id = null)
+    {
+        return DB::table($this->table)->where('id', $id)->first();
     }
 
     private function checkBalance($id = null, $amount = null){
       if(!empty($id) && !empty($amount)){
         $assumeBalance = DB::table($this->table)->select('balance')->where('id', $id)->first();
-        if($assumeBalance->balance > $amount){
-          return $assumeBalance->balance;
+        if(!empty($assumeBalance)){
+          if($assumeBalance->balance > $amount){
+            return $assumeBalance->balance;
+          }
         }
       }
       return false;
