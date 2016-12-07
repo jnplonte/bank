@@ -45,4 +45,9 @@ Route::group(['middleware' => ['bankApi']], function () {
     Route::match(['put'], 'deposit/{id}', [
         'as' => 'user', 'uses' => 'AccountController@deposit'
     ])->where('id', '[0-9]+');
+
+    //transfer money
+    Route::match(['put'], 'transfer/{id}', [
+        'as' => 'user', 'uses' => 'AccountController@transfer'
+    ])->where('id', '[0-9]+');
 });

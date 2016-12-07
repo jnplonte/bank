@@ -5,6 +5,8 @@ use Illuminate\Database\Eloquent\Model;
 
 use DB;
 
+use App\BankTransaction;
+
 class BankAccount extends Model
 {
     //datbase table
@@ -13,8 +15,15 @@ class BankAccount extends Model
     //fillable information
     protected $fillable = ['user_id', 'balance'];
 
-    public function __construct(){
+    //transfer limit
+    protected $transfer_limit;
 
+    //transfer charge
+    protected $transfer_charge;
+
+    public function __construct(){
+      $this->transfer_limit = env('TRASFER_LIMIT', '1000');
+      $this->transfer_charge = env('TRASFER_CHARGE', '100');
     }
 
     public function getAccount($id = null, $by = null){
@@ -91,6 +100,32 @@ class BankAccount extends Model
       return array('status' => 'failed', 'error' => 'unable to process request');
     }
 
+    public function transferAccount($id = null, $amount = null, $transfer_id = null){
+      if(!empty($id) && !empty($amount) && !empty($transfer_id)){
+        $userId = DB::table($this->table)->select('user_id')->where('id', $id)->first();
+        $transferUserId = DB::table($this->table)->select('user_id')->where('id', $transfer_id)->first();
+        if(!empty($userId) && !empty($transferUserId)){
+          if(!$this->checkLimit($id, $amount)){
+            return array('status' => 'failed', 'error' => 'transfer limit reach');
+          }
+          $amountWithdraw = (int)$amount; $amountDeposit  = (int)$amount;
+
+          if($userId != $transferUserId){
+            $amountWithdraw = (int)$amount + (int)$this->transfer_charge;
+          }
+
+          $widrawAccount = $this->withdrawAccount($id, $amountWithdraw);
+          if($widrawAccount['status'] == 'success'){
+            $depositAccount = $this->depositAccount($transfer_id, $amountDeposit);
+            if($depositAccount['status'] == 'success'){
+              return array('status' => 'success', 'data' => array('account_id' => $id));
+            }
+          }
+        }
+      }
+      return array('status' => 'failed', 'error' => 'unable to process request');
+    }
+
     public function getAccountInfo($id = null)
     {
         return DB::table($this->table)->where('id', $id)->first();
@@ -100,8 +135,21 @@ class BankAccount extends Model
       if(!empty($id) && !empty($amount)){
         $assumeBalance = DB::table($this->table)->select('balance')->where('id', $id)->first();
         if(!empty($assumeBalance)){
-          if($assumeBalance->balance > $amount){
+          if($assumeBalance->balance >= $amount){
             return $assumeBalance->balance;
+          }
+        }
+      }
+      return false;
+    }
+
+    private function checkLimit($id = null, $amount = null){
+      if(!empty($id) && !empty($amount)){
+        $bankTransaction = new BankTransaction();
+        $transactionAmount = $bankTransaction->getTransactionAmount($id);
+        if(!empty($transactionAmount)){
+          if($this->transfer_limit >= ((int)$transactionAmount->total_amount + (int)$amount)){
+            return true;
           }
         }
       }

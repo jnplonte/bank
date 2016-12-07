@@ -43,8 +43,22 @@ class AccountController extends Controller
       return abort(404);
     }
 
-    private function insertLog($id = null, $amount = null, $type = null){
+    public function transfer($id=null)
+    {
+      $putData = $this->request->all();
+      if(!empty($putData['amount']) && !empty($putData['transfer_id']) && $id != $putData['transfer_id']){
+        $bankAccount = new BankAccount();
+        $transferAccount = $bankAccount->transferAccount($id, $putData['amount'], $putData['transfer_id']);
+        if($transferAccount['status'] == 'success'){
+          $this->insertLog($id, $putData['amount'], 3, $putData['transfer_id']);
+        }
+        return response()->json($transferAccount);
+      }
+      return abort(404);
+    }
+
+    private function insertLog($id = null, $amount = null, $type = null, $transfer_id = null){
       $bankTransaction = new BankTransaction();
-      $bankTransaction->insertTransaction($id, $amount, $type);
+      $bankTransaction->insertTransaction($id, $amount, $type, $transfer_id);
     }
 }

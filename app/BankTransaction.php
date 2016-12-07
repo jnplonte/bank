@@ -18,7 +18,7 @@ class BankTransaction extends Model
     //fillable information
     protected $logInfo = ['1' => 'deposit %s from user id %d with account no. %d',
                           '2' => 'withdraw %s from user id %d with account no. %d',
-                          '3' => 'transfer %s from user id %d with account no. %d} to account no. %d'
+                          '3' => 'transfer %s from user id %d with account no. %d to account no. %d'
                         ];
 
     public function __construct(){
@@ -47,5 +47,13 @@ class BankTransaction extends Model
           DB::table($this->table)->insert($arr);
         }
       }
+    }
+
+    public function getTransactionAmount($id = null){
+      return DB::table($this->table)
+        ->select(DB::raw('SUM(amount) as total_amount'))
+        ->where('account_id', $id)
+        ->where('created_at', 'like', date('Y-m-d').'%')
+        ->first();
     }
 }
