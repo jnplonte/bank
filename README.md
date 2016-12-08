@@ -29,7 +29,7 @@
 #### transfer
 - **[PUT]** `/transfer/{account_id}`
 - required params: "amount", "transfer_id"
-- *note: transfer config is on .env named "TRASFER_LIMIT", "TRASFER_CHARGE"*
+- *note: transfer config is on .env named "TRASFER_LIMIT", "TRASFER_CHARGE", "TRANSFER_API"*
 
 #### add account
 - **[POST]** `/account/{user_id}`
