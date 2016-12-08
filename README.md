@@ -10,7 +10,7 @@
 
 
 ## Installation
-* clone the repository by running `git clone https://github.com/jnplonte/bank.git`
+* clone the repository by running `git clone git@github.com:jnplonte/bank.git`
 * change permission of {root}\bootstrap and {root}\storage by running `chmod 777 -R bootstrap storage`
 * install dependencies by running `composer install`
 * rename `.env-sample` to `.env` and change db configurations
