@@ -2,10 +2,11 @@
 
 
 ## Dependencies
-* laravel: [https://www.laravel.com/](https://www.laravel.com/)
-* php: [https://www.php.net/](https://www.php.net/)
-* mysql: [https://www.mysql.com/](https://www.mysql.com/)
+* laravel: [https://laravel.com/](https://laravel.com/)
+* php: [https://php.net/](https://php.net/)
+* mysql: [https://mysql.com/](https://mysql.com/)
 * composer: [https://getcomposer.org/](https://getcomposer.org/)
+* phpunit: [https://phpunit.de/](https://phpunit.de/)
 
 
 ## Installation
@@ -56,3 +57,9 @@
 
 #### delete user
 - **[DELETE]** `/user/{user_id}`
+
+
+## Testing
+* install phpunit by following this instruction [https://phpunit.de/getting-started.html](https://phpunit.de/getting-started.html)
+* go to root directory
+* run unit test by running `phpunit`
