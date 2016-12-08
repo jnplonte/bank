@@ -81,9 +81,8 @@ class BankUser extends Model
     public function deleteUser($id = null){
       if(!empty($id)){
         $users = DB::table($this->table)
-                ->where('id', $id)
-                ->delete();
-        if(!empty($users)){
+                ->where('id', $id);
+        if($users->delete()){
           return array('status' => 'success', 'data' => array('user_id' => $id));
         }
       }

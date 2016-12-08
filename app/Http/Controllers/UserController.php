@@ -72,11 +72,10 @@ class UserController extends Controller
           $deleteUser = $bankUser->deleteUser($id);
           if($deleteUser['status'] == 'success'){
             $bankAccount = new BankAccount();
-            return response()->json($bankAccount->deleteAccount($deleteUser['data']['user_id']));
+            return response()->json($bankAccount->deleteAccount($deleteUser['data']['user_id'], null));
           }else{
             return response()->json($deleteUser);
           }
-
       }
       return abort(404);
     }

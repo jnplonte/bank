@@ -49,6 +49,7 @@ class BankTransaction extends Model
       }
     }
 
+    //getting the total amount of trasfer per day
     public function getTransactionAmount($id = null){
       return DB::table($this->table)
         ->select(DB::raw('SUM(amount) as total_amount'))

@@ -2,6 +2,8 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Client;
 
 use DB;
 
@@ -21,9 +23,14 @@ class BankAccount extends Model
     //transfer charge
     protected $transfer_charge;
 
+    //transfer api
+    protected $transfer_api;
+
     public function __construct(){
-      $this->transfer_limit = env('TRASFER_LIMIT', '1000');
-      $this->transfer_charge = env('TRASFER_CHARGE', '100');
+      //updating trasnfer limit, charge and api can be configure on .env file
+      $this->transfer_limit = env('TRANSFER_LIMIT', '1000');
+      $this->transfer_charge = env('TRANSFER_CHARGE', '100');
+      $this->transfer_api = env('TRANSFER_API', null);
     }
 
     public function getAccount($id = null, $by = null){
@@ -52,12 +59,15 @@ class BankAccount extends Model
       return array('status' => 'failed', 'error' => 'unable to process request');
     }
 
-    public function deleteAccount($id = null){
+    public function deleteAccount($id = null, $account_id = null){
       if(!empty($id)){
         $accounts = DB::table($this->table)
-                    ->where('user_id', $id)
-                    ->delete();
-        if(!empty($accounts)){
+                    ->where('user_id', $id);
+        if(!empty($account_id)){
+          $accounts->where('id', $account_id);
+        }
+
+        if($accounts->delete()){
           return array('status' => 'success', 'data' => array('user_id' => $id));
         }
       }
@@ -102,6 +112,7 @@ class BankAccount extends Model
 
     public function transferAccount($id = null, $amount = null, $transfer_id = null){
       if(!empty($id) && !empty($amount) && !empty($transfer_id)){
+        $canTransfer = true;
         $userId = DB::table($this->table)->select('user_id')->where('id', $id)->first();
         $transferUserId = DB::table($this->table)->select('user_id')->where('id', $transfer_id)->first();
         if(!empty($userId) && !empty($transferUserId)){
@@ -110,15 +121,19 @@ class BankAccount extends Model
           }
           $amountWithdraw = (int)$amount; $amountDeposit  = (int)$amount;
 
+          //checking for same acount transfer
           if($userId != $transferUserId){
+            $canTransfer = $this->getTransferApi();
             $amountWithdraw = (int)$amount + (int)$this->transfer_charge;
           }
 
-          $widrawAccount = $this->withdrawAccount($id, $amountWithdraw);
-          if($widrawAccount['status'] == 'success'){
-            $depositAccount = $this->depositAccount($transfer_id, $amountDeposit);
-            if($depositAccount['status'] == 'success'){
-              return array('status' => 'success', 'data' => array('account_id' => $id));
+          if($canTransfer){
+            $widrawAccount = $this->withdrawAccount($id, $amountWithdraw);
+            if($widrawAccount['status'] == 'success'){
+              $depositAccount = $this->depositAccount($transfer_id, $amountDeposit);
+              if($depositAccount['status'] == 'success'){
+                return array('status' => 'success', 'data' => array('account_id' => $id));
+              }
             }
           }
         }
@@ -126,11 +141,13 @@ class BankAccount extends Model
       return array('status' => 'failed', 'error' => 'unable to process request');
     }
 
+    //getting of account information via account_id
     public function getAccountInfo($id = null)
     {
         return DB::table($this->table)->where('id', $id)->first();
     }
 
+    //getting of account information via account_id
     private function checkBalance($id = null, $amount = null){
       if(!empty($id) && !empty($amount)){
         $assumeBalance = DB::table($this->table)->select('balance')->where('id', $id)->first();
@@ -143,6 +160,7 @@ class BankAccount extends Model
       return false;
     }
 
+    //checking of remaining + the deposit or transfer amount to be able to perform deposit or transfer
     private function checkLimit($id = null, $amount = null){
       if(!empty($id) && !empty($amount)){
         $bankTransaction = new BankTransaction();
@@ -154,5 +172,19 @@ class BankAccount extends Model
         }
       }
       return false;
+    }
+
+    //call handy api to verify transfer
+    private function getTransferApi()
+    {
+        if(!empty($this->transfer_api)){
+          $client = new Client();
+          $res = $client->request('GET', $this->transfer_api);
+          if($res->getStatusCode() == 200){
+            $resBody = json_decode($res->getBody());
+            return ($resBody->status == 'success');
+          }
+        }
+        return false;
     }
 }

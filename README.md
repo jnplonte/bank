@@ -30,6 +30,14 @@
 - required params: "amount", "transfer_id"
 - *note: transfer config is on .env named "TRASFER_LIMIT", "TRASFER_CHARGE"*
 
+#### add account
+- **[POST]** `/account/{user_id}`
+- required params: "balance"
+
+#### delete account
+- **[DELETE]** `/account/{user_id}`
+- required params: "account_id"
+
 #### add user
 - **[POST]** `/user`
 - required params: "email"

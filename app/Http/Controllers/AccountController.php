@@ -57,6 +57,27 @@ class AccountController extends Controller
       return abort(404);
     }
 
+    public function manage($id=null)
+    {
+      if ($this->request->isMethod('post')) {
+        $postData = $this->request->all();
+        if(!empty($postData['balance'])){
+          $bankAccount = new BankAccount();
+          return response()->json($bankAccount->insertAccount($id, $postData['balance']));
+        }
+      }
+
+      if ($this->request->isMethod('delete')) {
+        $deleteData = $this->request->all();
+        if(!empty($deleteData['account_id'])){
+          $bankAccount = new BankAccount();
+          return response()->json($bankAccount->deleteAccount($id, $deleteData['account_id']));
+        }
+      }
+      return abort(404);
+    }
+
+    //function on insert log to identify the limit trasfer
     private function insertLog($id = null, $amount = null, $type = null, $transfer_id = null){
       $bankTransaction = new BankTransaction();
       $bankTransaction->insertTransaction($id, $amount, $type, $transfer_id);
