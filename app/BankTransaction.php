@@ -54,6 +54,7 @@ class BankTransaction extends Model
       return DB::table($this->table)
         ->select(DB::raw('SUM(amount) as total_amount'))
         ->where('account_id', $id)
+        ->where('transfer_user_id', '!=', '')
         ->where('created_at', 'like', date('Y-m-d').'%')
         ->first();
     }

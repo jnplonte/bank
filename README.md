@@ -63,3 +63,4 @@
 * install phpunit by following this instruction [https://phpunit.de/getting-started.html](https://phpunit.de/getting-started.html)
 * go to root directory
 * run unit test by running `phpunit`
+* *note: test is inside {root}/tests/*

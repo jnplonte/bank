@@ -24,6 +24,12 @@ class account_seeder extends Seeder
             'balance' => '20000',
             'updated_at' =>  date('Y-m-d G:i:s'),
             'created_at' =>  date('Y-m-d G:i:s')
+        ],[
+            'id' => '3',
+            'user_id' => '2',
+            'balance' => '30000',
+            'updated_at' =>  date('Y-m-d G:i:s'),
+            'created_at' =>  date('Y-m-d G:i:s')
         ]]);
     }
 }

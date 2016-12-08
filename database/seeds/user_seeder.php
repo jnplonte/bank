@@ -11,13 +11,21 @@ class user_seeder extends Seeder
      */
     public function run()
     {
-      DB::table('user')->insert([
+      DB::table('user')->insert([[
           'id' => '1',
           'first_name' => 'john paul',
           'last_name' => 'onte',
           'email' => 'jnpl.onte@gmail.com',
           'updated_at' =>  date('Y-m-d G:i:s'),
           'created_at' =>  date('Y-m-d G:i:s')
-      ]);
+      ],
+      [
+          'id' => '2',
+          'first_name' => 'jnpl',
+          'last_name' => 'onte',
+          'email' => 'jnpl@gmail.com',
+          'updated_at' =>  date('Y-m-d G:i:s'),
+          'created_at' =>  date('Y-m-d G:i:s')
+      ]]);
     }
 }
